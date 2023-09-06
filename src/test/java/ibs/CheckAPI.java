@@ -55,10 +55,38 @@ public class CheckAPI {
     @Step("Метод для очистки списка")
     static void dataReset() throws SQLException {
         given()
+                .contentType(ContentType.JSON)
                 .when()
-                .post("/api/data/reset");
+                .log().all()
+                .post("/api/data/reset")
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(200)
+                .extract().asString();
         List<String> s = ConnectDB.sqlReq();
         Assertions.assertTrue(s.size()==4, "Размер списка не равен 4");
     }
 
+    static void getElemTest2(PojoFood food) {
+
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .log().all()
+                .get("/api/food")
+                .then()
+                .log().all()
+                .and()
+                .assertThat()
+                .statusCode(200)
+                .body("name[0]", equalTo("Апельсин"))
+                .body("name[1]", equalTo("Капуста"))
+                .body("name[2]", equalTo("Помидор"))
+                .body("name[3]", equalTo("Яблоко"))
+                .body("name[4]", equalTo(food.getName()))
+                .body("type[4]", equalTo(food.getTypeBD()))
+                .body("exotic[4]", equalTo(food.isExotic()))
+                .extract().asString();
+    }
 }
